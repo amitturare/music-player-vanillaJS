@@ -59,33 +59,38 @@ const progress = getElements("#progress");
 const currentTimeElement = getElements("#current-time");
 const durationElement = getElements("#duration");
 
-// Check if playing
-let isPlaying = false; // Default
+const volumeIcon = getElements("#volume-icon");
+const volumeRange = getElements(".volume-range");
+const volumeBar = getElements(".volume-bar");
 
 // ==== Play/Pause Function ====
 function playSong() {
-    isPlaying = true;
     playBtn.classList.replace("fa-play", "fa-pause");
     playBtn.setAttribute("title", "Pause");
     music.play();
 }
-function pauseSong() {
-    isPlaying = false;
-    playBtn.classList.replace("fa-pause", "fa-play");
-    playBtn.setAttribute("title", "Play");
-    music.pause();
+
+function togglePlay() {
+    if (music.paused) {
+        playSong();
+    } else {
+        playBtn.classList.replace("fa-pause", "fa-play");
+        playBtn.setAttribute("title", "Play");
+        music.pause();
+    }
 }
 
-// Update DOM
+// ==== prevSong & nextSong ====
+// Update DOM and play the song
 function loadSong(song) {
     title.textContent = song.displayName;
     artist.textContent = song.artist;
     music.src = `music/${song.name}.mp3`;
     image.src = `img/${song.name}.jpg`;
     link.href = song.link;
+    playSong();
 }
 
-// ==== prevSong & nextSong ====
 let index = 0;
 
 function prevSong() {
@@ -93,10 +98,7 @@ function prevSong() {
     if (index < 0) {
         index = songs.length - 1;
     }
-
-    // console.log(index);
     loadSong(songs[index]);
-    playSong();
 }
 
 function nextSong() {
@@ -104,26 +106,20 @@ function nextSong() {
     if (index > songs.length - 1) {
         index = 0;
     }
-
-    // console.log(index);
     loadSong(songs[index]);
-    playSong();
 }
 
 // ==== Update Progress Bar and Time ====
 function updateProgressBar(e) {
-    if (isPlaying) {
-        const { duration, currentTime } = e.srcElement;
-        // console.log(duration, currentTime);
+    // const { duration, currentTime } = e.srcElement;
 
-        // Update progress bar width
-        const progressPercent = (currentTime / duration) * 100;
-        progress.style.width = `${progressPercent}%`;
+    // Update progress bar width
+    const progressPercent = (music.currentTime / music.duration) * 100;
+    progress.style.width = `${progressPercent}%`;
 
-        // Update duration and currentTime
-        durationElement.textContent = convertToMins(duration);
-        currentTimeElement.textContent = convertToMins(currentTime);
-    }
+    // Update duration and currentTime
+    durationElement.textContent = convertToMins(music.duration);
+    currentTimeElement.textContent = convertToMins(music.currentTime);
 }
 // Helper function for converting secs to mins
 function convertToMins(time) {
@@ -149,13 +145,64 @@ function setProgressBar(e) {
     const totalWidth = this.clientWidth;
     const clickedPoint = e.offsetX;
 
-    const { duration } = music;
-    const clickedSecs = (clickedPoint / totalWidth) * duration;
+    const clickedSecs = (clickedPoint / totalWidth) * music.duration;
     music.currentTime = clickedSecs;
 }
 
+// ==== Volume Control ====
+let lastVolume = 1;
+
+function changeVolume(e) {
+    // NOTES
+    // clientWidth is the total width
+    // offsetX is point where the user clicked
+
+    let volume = e.offsetX / this.clientWidth;
+    // Rounding volume up or down
+    if (volume > 0.9) {
+        volume = 1;
+    } else if (volume < 0.1) {
+        volume = 0;
+    }
+
+    volumeBar.style.width = `${volume * 100}%`;
+    music.volume = volume;
+
+    // Change the volume icon
+    volumeIcon.className = "";
+    if (volume > 0.7) {
+        volumeIcon.classList.add("fas", "fa-volume-up");
+    } else if (volume < 0.7 && volume > 0) {
+        volumeIcon.classList.add("fas", "fa-volume-up");
+    } else if (volume === 0) {
+        volumeIcon.classList.add("fas", "fa-volume-mute");
+    }
+
+    // Whatever volume is clicked at the end should be stored into lastVolume
+    lastVolume = volume;
+}
+
+function toggleVolume() {
+    volumeIcon.className = "";
+
+    if (music.volume) {
+        lastVolume = music.volume;
+        music.volume = 0;
+        volumeBar.style.width = 0;
+
+        volumeIcon.classList.add("fas", "fa-volume-mute");
+        volumeIcon.setAttribute("title", "Unmute");
+    } else {
+        music.volume = lastVolume;
+        volumeBar.style.width = `${lastVolume * 100}%`;
+
+        volumeIcon.classList.add("fas", "fa-volume-up");
+        volumeIcon.setAttribute("title", "Mute");
+    }
+}
+
 // ======== Event Listeners ========
-playBtn.addEventListener("click", () => (isPlaying ? pauseSong() : playSong()));
+playBtn.addEventListener("click", togglePlay);
 prevBtn.addEventListener("click", prevSong);
 nextBtn.addEventListener("click", nextSong);
 
@@ -164,3 +211,7 @@ progressContainer.addEventListener("click", setProgressBar);
 
 // Play next song when ended
 music.addEventListener("ended", nextSong);
+
+// Volume
+volumeRange.addEventListener("click", changeVolume);
+volumeIcon.addEventListener("click", toggleVolume);
