@@ -166,21 +166,44 @@ h3 {
 
 /* Media Query for Phones */
 @media screen and (max-width: 500px) {
+    .player-container {
+        width: 95vw;
+    }
+    .img-container {
+        left: 46px;
+    }
     .volume-container {
         transform: rotate(0deg);
-        position: relative;
-        bottom: -25px;
-        left: 0;
+        bottom: -130px;
+        left: 15px;
     }
     .volume-icon {
         transform: rotate(0deg);
     }
 
+    h2 {
+        font-size: 20px;
+    }
+
+    h3 {
+        font-size: 15px;
+    }
+
+    .player-controls {
+        top: -10px;
+    }
+}
+/* @media screen and (max-width: 376px) {
     .player-container {
         width: 95vw;
     }
     .img-container {
         left: 29px;
+    }
+    .volume-container {
+        transform: rotate(0deg);
+        bottom: -25px;
+        left: 0;
     }
 
     h2 {
@@ -195,4 +218,4 @@ h3 {
         top: -10px;
         left: 100px;
     }
-}
+} */
