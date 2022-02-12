@@ -18,7 +18,7 @@ body {
 
 .player-container {
     height: 500px;
-    width: 400px;
+    min-width: 400px;
     background: #e7e7e7;
     border-radius: 20px;
     box-shadow: 0 10px 30px 1px rgba(0, 0, 0, 0.2);
@@ -60,7 +60,7 @@ h3 {
     position: absolute;
     bottom: 40%;
     right: -60%;
-    width: 300px;
+    min-width: 300px;
     transform: rotate(270deg);
     margin: 2rem;
 }
@@ -165,17 +165,20 @@ h3 {
 }
 
 /* Media Query for Phones */
-@media screen and (max-width: 413px) {
+@media screen and (max-width: 500px) {
     .player-container {
-        width: 85vw;
+        display: grid;
+        grid: 1fr 1fr;
+        row-gap: 1.5rem;
     }
-    .img-container {
-        left: 26px;
-    }
+
     .volume-container {
+        position: static;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        top: 0;
         transform: rotate(0deg);
-        bottom: -120px;
-        left: -5px;
     }
     .volume-icon {
         transform: rotate(0deg);
@@ -191,6 +194,5 @@ h3 {
 
     .player-controls {
         top: -10px;
-        left: 100px;
     }
 }
